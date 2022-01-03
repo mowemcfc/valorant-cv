@@ -12,8 +12,7 @@ def main():
         required=True, help='Input MP4 video path.'
     )
     parser.add_argument('-o', '--output',
-        required=True, default='../output',
-        help='Output folder for processed frames. default = \'../output\''
+        default='../output', help='Output folder for processed frames. default = ../output'
     )
     parser.add_argument('-r', '--rate', type=int,
         default=500, help='Millisecond interval at which to record frames. default = 500ms'
@@ -23,7 +22,8 @@ def main():
     _process_image(args.input, args.output, args.rate)
 
 
-# TODO: may want to consider a "smarter" form of choosing frames
+# TODO: may want to consider a "smarter" form of choosing frames. maybe some form
+#       of 'dumb' classifier for a brief run-through.
 def _process_image(input_video: str, output_folder: str, interval: int) -> None:
     video_capture = cv2.VideoCapture(input_video)
     frame_count = 0
