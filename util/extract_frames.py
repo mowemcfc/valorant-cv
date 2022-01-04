@@ -1,5 +1,6 @@
 import argparse
-import glob
+from glob import glob
+from typing import List
 import sys
 from cv2 import cv2
 
@@ -8,8 +9,9 @@ from cv2 import cv2
 def main():
     parser = argparse.ArgumentParser(description='Extract frames from mp4 at set rate')
 
-    parser.add_argument('-i', '--input',
-        required=True, help='Input MP4 video path.'
+    parser.add_argument('-i', '--inputs',
+        required=True, nargs='+',
+        help='Space-delimited list of input MP4 files.'
     )
     parser.add_argument('-o', '--output',
         default='../output', help='Output folder for processed frames. default = ../output'
@@ -19,30 +21,38 @@ def main():
     )
     args = parser.parse_args()
 
-    _process_image(args.input, args.output, args.rate)
+    _process_input_videos(args.inputs, args.output, args.rate)
+
+
+def _process_input_videos(input_list: List[str], output_folder: str, interval: int) -> None:
+    for video in input_list:
+        _split_video_into_frames(video, output_folder, interval)
 
 
 # TODO: may want to consider a "smarter" form of choosing frames. maybe some form
 #       of 'dumb' classifier for a brief run-through.
-def _process_image(input_video: str, output_folder: str, interval: int) -> None:
+def _split_video_into_frames(input_video: str, output_folder: str, interval: int) -> None:
     video_capture = cv2.VideoCapture(input_video)
     frame_count = 0
 
-    # Calculate total number of intervals that we will take a frame on
+    # frame count / fps * (interval / 1000) = total # of video frames
     total_frames = int(
-        video_capture.get(cv2.CAP_PROP_FRAME_COUNT) // ( video_capture.get(cv2.CAP_PROP_FPS) * (interval / 1000) ) # pylint: disable=line-too-long
+        video_capture.get(cv2.CAP_PROP_FRAME_COUNT) // (video_capture.get(cv2.CAP_PROP_FPS) * (interval / 1000) ) # pylint: disable=line-too-long
     )
 
     success = True
     while (success, image := video_capture.read()) and (frame_count <= total_frames):
-        # Capture frames every `interval` milliseconds
+        # skip ahead by 1 interval and take a snapshot of frames 
         video_capture.set(cv2.CAP_PROP_POS_MSEC,
             (frame_count*interval)
         )
         success, image = video_capture.read()
 
-        if cv2.imwrite(f"{output_folder}/frame{frame_count}.jpg", image):
-            print(f"\r{frame_count}/{total_frames}", end=' ', flush=True)
+        # Truncate extension and save frame as jpg image
+        output_filename = input_video.split('/')[-1].split('.')[0] # "folder1/folder2/video.mp4" -> "video"
+        output_path = f"{output_folder}{output_filename}{frame_count}.jpg" # "output_folder/video123.jpg"
+        if cv2.imwrite(output_path, image):
+            print(f"\r{input_video}: {frame_count}/{total_frames}", end=' ', flush=True) # "video.mp4: 12/245"
             frame_count += 1
         else:
             print(f"Failed to save frame {frame_count}, exiting. " \
