@@ -1,7 +1,6 @@
 import argparse
-from glob import glob
-from typing import List
 import sys
+from typing import List
 from cv2 import cv2
 
 
@@ -42,7 +41,7 @@ def _split_video_into_frames(input_video: str, output_folder: str, interval: int
 
     success = True
     while (success, image := video_capture.read()) and (frame_count <= total_frames):
-        # skip ahead by 1 interval and take a snapshot of frames 
+        # skip ahead by 1 interval and take a snapshot of frames
         video_capture.set(cv2.CAP_PROP_POS_MSEC,
             (frame_count*interval)
         )
