@@ -25,4 +25,16 @@ resource "aws_s3_bucket" "yolov4_sagemaker_artifact_bucket" {
   }
 }
 
+resource "aws_s3_bucket_object" "sagemaker_input_files" {
+  bucket = aws_s3_bucket.sagemaker_input_bucket.id
+
+  key = "profile"
+
+  acl = "private"
+
+  source = "../media/selected_frames.zip"
+
+  etag = md5("valorantcv_sagemaker_input_files")
+}
+
 # TODO: disable ACL - use policy-based control - https://github.com/hashicorp/terraform-provider-aws/issues/22069
