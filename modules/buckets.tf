@@ -28,7 +28,7 @@ resource "aws_s3_bucket" "yolov4_sagemaker_artifact_bucket" {
 resource "aws_s3_bucket_object" "sagemaker_input_files" {
   bucket = aws_s3_bucket.sagemaker_input_bucket.id
 
-  key = "profile"
+  key = "selected_frames.zip"
 
   acl = "private"
 
